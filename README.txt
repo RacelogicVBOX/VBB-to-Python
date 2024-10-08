@@ -23,7 +23,7 @@ be kept together.
 This is a port of the VBB-to-MATLAB converter to Python. It functions 
 in the same way and outputs the Python equivalent of the MATLAB structs.
 
-Test_Script.m is a demo script showing how to use the converter.
+Test_Script.py is a demo script showing how to use the converter.
 
 Create a new instance of the VBBReader class then call .read_vbb_file() with 
 a string for the file path to the VBB file. The file will then be 
