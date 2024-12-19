@@ -47,6 +47,7 @@ def main():
     reader = VBBReader()
     reader.read_vbb_file('ExampleBrakeStop.vbb')
 
+
     # This will read a VBB file into Python and create a dictionary object.
     # 
     # Data is stored in the 'channelDefinitions' entry. Each channel has a 'timestamps' and 'data' array.

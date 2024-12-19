@@ -1,5 +1,5 @@
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict
 
 from FileReader import FileReader
@@ -308,8 +308,16 @@ class VBBReader:
         # Loop through each Sample Group definition
         for group_data in self.channel_group_data:
 
-            # Make sure there's data in here
-            if len(group_data) == 0 or len(group_data['instanceLocations']) == 0:
+            # Make sure there's channels in here
+            if len(group_data) == 0:
+                continue
+
+            # Make sure there is data in these channels
+            if len(group_data['instanceLocations']) == 0:
+                # Ensure timestamps are explicitly set to an empty ndarray - if there is no data then the timestamps array will default to a list. We want a np.array
+                for channel_location in group_data.get('channelLocations', []):
+                    channel_location = int(channel_location)
+                    self.vbb_file.channel_definitions[channel_location]['timestamps'] = np.array([], dtype=np.float64)
                 continue
 
             # Extract the timestamp data first. It runs from bytes 2-5 (remeber Python is zero indexed unlike MATLAB)
@@ -439,7 +447,6 @@ class VBBReader:
 
         # Loop through each channel and estimate its frequency
         for channel_definition in self.vbb_file.channel_definitions:
-
             if channel_definition['timestamps'].size == 0:
                 continue    # There is no data in the channel
             elif channel_definition['timestamps'].size == 1:
@@ -804,8 +811,13 @@ class VBBReader:
         # Read the bytes out of the file
         (byte_Array, self.isEoF) = self.reader.read_bytes(n_bytes)
         # Convert the bytes into the correct format
-        #parsed_Value = np.ascontiguousarray(byte_Array).view(dtype=data_type)
         parsed_Value = byte_Array.view(data_type)[0]
+
+        # Convert Numpy scalar to Python-native type - something changed between Numpy versions 1.23.5 and 1.24.4 to require this
+        if isinstance(parsed_Value, (np.integer, np.unsignedinteger)):
+            parsed_Value = int(parsed_Value)  # Convert to Python int
+        elif isinstance(parsed_Value, np.floating):
+            parsed_Value = float(parsed_Value)  # Convert to Python float
 
         return parsed_Value
 
@@ -939,10 +951,12 @@ class VBBReader:
                 parsed_datetime = parsed_datetime.astimezone()  # Local timezone
             elif raw_time_value & 0xC000000000000000 == 0:
                 # We're in UTC time
-                parsed_datetime = parsed_datetime.replace(tzinfo=datetime.timezibe.UTC)
+                parsed_datetime = parsed_datetime.replace(tzinfo=timezone.utc)
             else:
                 # Unspecified or floating
                 parsed_datetime = parsed_datetime.replace(tzinfo=None)
+
+
 
             return parsed_datetime
         else:

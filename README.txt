@@ -1,6 +1,6 @@
 #############################
    VBB to Python converter 
-	   v1.0
+	   v1.1
       2024 | Racelogic
 
 #############################
@@ -23,7 +23,7 @@ be kept together.
 This is a port of the VBB-to-MATLAB converter to Python. It functions 
 in the same way and outputs the Python equivalent of the MATLAB structs.
 
-Test_Script.py is a demo script showing how to use the converter.
+Test_Script.m is a demo script showing how to use the converter.
 
 Create a new instance of the VBBReader class then call .read_vbb_file() with 
 a string for the file path to the VBB file. The file will then be 
@@ -108,8 +108,13 @@ How does this relate to the VBB to Python converter?
 	which they’d prefer to use but ‘time’ is the VBO analogue. 
 
 
+#############################
+        Patch Notes
+#############################
 
-
+v1.1 - 19-12-2024
+[FIX] VBBReader.extract_channel_data now explicitly sets empty channel timestamps to arrays (previously defaulted to lists)
+[FIX] VBBReader.read_primitive now casts values into Python data types to account for changes in Numpy 1.24.4
 
 
 
